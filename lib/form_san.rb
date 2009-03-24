@@ -20,6 +20,10 @@ module FormSan
       output_buffer << "</#{name}>"
     end
     
+    def tag(output_buffer, name, html_options={})
+      output_buffer << "<#{name}#{hash_to_attributes(html_options)} />"
+    end
+    
     private
     
     def hash_to_attributes(html_options)

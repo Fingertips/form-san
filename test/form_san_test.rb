@@ -26,7 +26,14 @@ class FormSanTest < ActiveSupport::TestCase
     assert_equal ' class="current active"', FormSan.helpers.send(:hash_to_attributes, {'class' => [:current, :active]})
   end
   
-  test "constructs a HTML tag with content" do
+  test "constructs an HTML tag" do
+    output_buffer = ''; FormSan.tag(output_buffer, 'input')
+    assert_equal '<input />', output_buffer
+    output_buffer = ''; FormSan.tag(output_buffer, 'input', :type => 'text')
+    assert_equal '<input type="text" />', output_buffer
+  end
+  
+  test "constructs an HTML tag with content" do
     output_buffer = ''; FormSan.content_tag(output_buffer, 'div')
     assert_equal '<div></div>', output_buffer
     output_buffer = ''; FormSan.content_tag(output_buffer, :div)

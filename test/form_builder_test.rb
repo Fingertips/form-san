@@ -23,7 +23,7 @@ class FormBuilderTest < ActiveSupport::TestCase
     assert_equal '<div class="field">content</div>', @output_buffer
   end
   
-  test "construct a default label" do
+  test "construct a label" do
     @builder.label :published
     assert_equal '<div class="label"><label for="book_published">Published</label></div>', @output_buffer
   end
