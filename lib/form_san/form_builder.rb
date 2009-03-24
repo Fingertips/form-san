@@ -36,5 +36,21 @@ module FormSan
         end
       end
     end
+    
+    def input(attribute, html_options={})
+      html_options.reverse_merge!(
+        :id   => "#{@record.class.name.downcase}_#{attribute}",
+        :name => "#{@record.class.name.downcase}[#{attribute}]"
+      )
+      FormSan.tag(output_buffer, 'input', html_options)
+    end
+    
+    def text_field(attribute, html_options={})
+      input(attribute, html_options.reverse_merge(:type => 'text'))
+    end
+    
+    def password_field(attribute, html_options={})
+      input(attribute, html_options.reverse_merge(:type => 'password'))
+    end
   end
 end

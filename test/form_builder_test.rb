@@ -46,4 +46,24 @@ class FormBuilderTest < ActiveSupport::TestCase
     end
     assert_equal '<label><input type="checkbox" name="make" value="money" /> Visible online</label>', @output_buffer
   end
+  
+  test "construct a text field" do
+    @builder.text_field(:title)
+    assert_equal '<input type="text" name="book[title]" id="book_title" />', @output_buffer
+  end
+  
+  test "construct a text field with custom id" do
+    @builder.text_field(:title, :id => 'custom')
+    assert_equal '<input type="text" name="book[title]" id="custom" />', @output_buffer
+  end
+  
+  test "construct a password field" do
+    @builder.password_field(:password)
+    assert_equal '<input type="password" name="book[password]" id="book_password" />', @output_buffer
+  end
+  
+  test "construct a password field with custom id" do
+    @builder.password_field(:password, :id => 'custom')
+    assert_equal '<input type="password" name="book[password]" id="custom" />', @output_buffer
+  end
 end
