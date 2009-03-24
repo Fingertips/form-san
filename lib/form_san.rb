@@ -6,17 +6,21 @@ module FormSan
     include ActionController::RecordIdentifier
     include ActionController::PolymorphicRoutes
     
-    def form_for(record, options={}, &block)
-      content_tag('form', :action => polymorphic_path(record)) do
-        block.call(FormSan::FormBuilder.new(record, options))
+    protected :default_url_options, :default_url_options=
+    
+    def form_for(output_buffer, record, options={}, &block)
+      content_tag(output_buffer, 'form', :action => polymorphic_path(record)) do
+        block.call(FormSan::FormBuilder.new(output_buffer, record, options)) if block_given?
       end
     end
     
-    def content_tag(name, html_options={}, &block)
-      output = "<#{name}#{hash_to_attributes(html_options)}>"
-      output << block.call.to_s if block_given?
-      output << "</#{name}>"
+    def content_tag(output_buffer, name, html_options={}, &block)
+      output_buffer << "<#{name}#{hash_to_attributes(html_options)}>"
+      block.call.to_s if block_given?
+      output_buffer << "</#{name}>"
     end
+    
+    private
     
     def hash_to_attributes(html_options)
       attributes = html_options.map do |key, value|
@@ -32,6 +36,10 @@ module FormSan
   end
   
   def self.method_missing(method, *arguments, &block)
-    helpers.send(method, *arguments, &block)
+    if helpers.public_methods(inherited=false).include?(method.to_s)
+      helpers.send(method, *arguments, &block)
+    else
+      super
+    end
   end
 end

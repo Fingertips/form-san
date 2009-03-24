@@ -3,25 +3,40 @@ require File.expand_path('../helper', __FILE__)
 require 'models/book'
 
 class FormSanTest < ActiveSupport::TestCase
+  test "should not forward methods to the helpers if they're private" do
+    assert_raises(NoMethodError) do
+      FormSan.hash_to_attributes
+    end
+    
+    assert_raises(NoMethodError) do
+      FormSan.default_url_options
+    end
+  end
+  
   test "form_for should yield a form builder" do
-    form = FormSan.form_for(Book.new) {}
+    form = ''; FormSan.form_for(form, Book.new) {}
     assert_equal '<form action="/books"></form>', form
   end
   
   test "converts a hash to HTML tag attributes" do
-    assert_equal '', FormSan.hash_to_attributes({})
-    assert_equal ' id="mine"', FormSan.hash_to_attributes({:id => 'mine'})
-    assert_equal ' style="width: 10px;" id="mine"', FormSan.hash_to_attributes({:id => 'mine', :style => 'width: 10px;'})
-    assert_equal ' class="current active"', FormSan.hash_to_attributes({:class => ['current', 'active']})
-    assert_equal ' class="current active"', FormSan.hash_to_attributes({'class' => [:current, :active]})
+    assert_equal '', FormSan.helpers.send(:hash_to_attributes, {})
+    assert_equal ' id="mine"', FormSan.helpers.send(:hash_to_attributes, {:id => 'mine'})
+    assert_equal ' style="width: 10px;" id="mine"', FormSan.helpers.send(:hash_to_attributes, {:id => 'mine', :style => 'width: 10px;'})
+    assert_equal ' class="current active"', FormSan.helpers.send(:hash_to_attributes, {:class => ['current', 'active']})
+    assert_equal ' class="current active"', FormSan.helpers.send(:hash_to_attributes, {'class' => [:current, :active]})
   end
   
   test "constructs a HTML tag with content" do
-    assert_equal '<div></div>', FormSan.content_tag('div')
-    assert_equal '<div></div>', FormSan.content_tag(:div)
+    output_buffer = ''; FormSan.content_tag(output_buffer, 'div')
+    assert_equal '<div></div>', output_buffer
+    output_buffer = ''; FormSan.content_tag(output_buffer, :div)
+    assert_equal '<div></div>', output_buffer
     
-    assert_equal '<div></div>', FormSan.content_tag(:div, :class => nil)
-    assert_equal '<div class="current"></div>', FormSan.content_tag(:div, :class => 'current')
-    assert_equal '<div class="current active"></div>', FormSan.content_tag(:div, :class => %w(current active))
+    output_buffer = ''; FormSan.content_tag(output_buffer, :div, :class => nil)
+    assert_equal '<div></div>', output_buffer
+    output_buffer = ''; FormSan.content_tag(output_buffer, :div, :class => 'current')
+    assert_equal '<div class="current"></div>', output_buffer
+    output_buffer = ''; FormSan.content_tag(output_buffer, :div, :class => %w(current active))
+    assert_equal '<div class="current active"></div>', output_buffer
   end
 end

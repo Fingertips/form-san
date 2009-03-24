@@ -1,10 +1,9 @@
 module FormSan
   class FormBuilder
-    attr_accessor :output
-    alias to_s output
+    attr_accessor :output_buffer
     
-    def initialize(record, options={})
-      @output = ''
+    def initialize(output_buffer, record, options={})
+      @output_buffer = output_buffer
       @record = record
       @options = options
     end
@@ -12,7 +11,7 @@ module FormSan
     def fields(html_options={}, &block)
       html_options[:class] ||= []
       html_options[:class] << 'fields'
-      output << FormSan.content_tag('div', html_options) do
+      FormSan.content_tag(output_buffer, 'div', html_options) do
         block.call(self) if block_given?
       end
     end
@@ -20,7 +19,7 @@ module FormSan
     def fieldset(html_options={}, &block)
       html_options[:class] ||= []
       html_options[:class] << 'fieldset'
-      output << FormSan.content_tag('div', html_options) do
+      FormSan.content_tag(output_buffer, 'div', html_options) do
         block.call(self) if block_given?
       end
     end

@@ -18,6 +18,7 @@ end
 frameworks.each { |framework| $:.unshift(File.join(rails, framework, 'lib')) }
 $:.unshift File.join(TEST_ROOT_DIR, '/../lib')
 $:.unshift File.join(TEST_ROOT_DIR, '/lib')
+$:.unshift TEST_ROOT_DIR
 
 ENV['RAILS_ENV'] = 'test'
 
