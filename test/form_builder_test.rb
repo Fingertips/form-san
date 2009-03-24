@@ -18,11 +18,6 @@ class FormBuilderTest < ActiveSupport::TestCase
     assert_equal '<div class="fields">content</div>', @output_buffer
   end
   
-  test "construct a field with content" do
-    @builder.field { @output_buffer << 'content' }
-    assert_equal '<div class="field">content</div>', @output_buffer
-  end
-  
   test "construct a label" do
     @builder.label :published
     assert_equal '<div class="label"><label for="book_published">Published</label></div>', @output_buffer
@@ -75,6 +70,33 @@ class FormBuilderTest < ActiveSupport::TestCase
   test "construct a submit button with a name" do
     @builder.submit('Save', :name => 'continue')
     assert_equal '<input type="submit" value="Save" name="continue" />', @output_buffer
+  end
+  
+  test "construct a composite text field" do
+    @builder.field(:title, :type => :text)
+    assert_equal '<div class="field"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" id="book_title" /></div>', @output_buffer
+  end
+  
+  test "contruct a composite password field " do
+    @builder.field(:password, :type => :password)
+    assert_equal '<div class="field"><div class="label"><label for="book_password">Password</label></div><input type="password" name="book[password]" id="book_password" /></div>', @output_buffer
+  end
+  
+  test "construct a composite text field with alternative humanize name" do
+    @builder.field(:title, :type => :text, :humanized => 'The Title')
+    assert_equal '<div class="field"><div class="label"><label for="book_title">The Title</label></div><input type="text" name="book[title]" id="book_title" /></div>', @output_buffer
+  end
+  
+  test "construct a composite text field with html attributes" do
+    @builder.field(:title, { :type => :text, :humanized => 'The Title' }, { :class => 'medium' })
+    assert_equal '<div class="field"><div class="label"><label for="book_title">The Title</label></div><input type="text" class="medium" name="book[title]" id="book_title" /></div>', @output_buffer
+  end
+  
+  test "construct a composite text field with extra contents" do
+    @builder.field(:title, :type => :text) do
+      '<p class="note">Used in the hover text for books.</p>'
+    end
+    assert_equal '<div class="field"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" id="book_title" /><p class="note">Used in the hover text for books.</p></div>', @output_buffer
   end
 end
 

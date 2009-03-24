@@ -31,8 +31,12 @@ module FormSan
       FormSan.content_tag(output_buffer, 'div', :class => 'fields') { block.call(self) }
     end
     
-    def field(&block)
-      FormSan.content_tag(output_buffer, 'div', :class => 'field') { block.call(self) }
+    def field(attribute, options={}, html_options={}, &block)
+      FormSan.content_tag(output_buffer, 'div', :class => 'field') do
+        label(attribute, options[:humanized])
+        input(attribute, html_options.merge(:type => options[:type]))
+        output_buffer << block.call if block_given?
+      end
     end
     
     def label(attribute, humanized_attribute=nil, html_options={}, &block)
