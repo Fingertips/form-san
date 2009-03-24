@@ -23,7 +23,6 @@ class FormBuilderTest < ActiveSupport::TestCase
     assert_equal '<div class="field">content</div>', @output_buffer
   end
   
-  
   test "construct a default label" do
     @builder.label :published
     assert_equal '<div class="label"><label for="book_published">Published</label></div>', @output_buffer
@@ -35,9 +34,16 @@ class FormBuilderTest < ActiveSupport::TestCase
   end
   
   test "construct a custom label with contents" do
-    @builder.label(:published, 'Published') do
+    @builder.label(:published) do
       @output_buffer << '<input type="checkbox" name="make" value="money" />'
     end
     assert_equal '<label><input type="checkbox" name="make" value="money" /> Published</label>', @output_buffer
+  end
+  
+  test "construct a custom label with contents and humanized attribute" do
+    @builder.label(:published, 'Visible online') do
+      @output_buffer << '<input type="checkbox" name="make" value="money" />'
+    end
+    assert_equal '<label><input type="checkbox" name="make" value="money" /> Visible online</label>', @output_buffer
   end
 end
