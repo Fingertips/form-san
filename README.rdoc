@@ -1,0 +1,12 @@
+= Form-San
+
+Form-San is a lean replacement for the Rails form builder.
+
+  <% FormSan.form_for(@book) do |f| %>
+    <% f.fieldset do %>
+      <% f.fields do %>
+        <f.text_field_with_label :email %>
+        <p class="note">We're not going to spam you.</p>
+      <% end %>
+    <% end %>
+  <% end %>
