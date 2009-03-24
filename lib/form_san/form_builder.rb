@@ -8,6 +8,21 @@ module FormSan
       @options = options
     end
     
+    def error_messages(html_options={})
+      unless @record.errors.count.zero?
+        FormSan.content_tag('p', html_options.reverse_merge(:class => 'errors')) do
+          attributes_with_errors =  @record.errors.map { |attribute, _| attribute } - ['base']
+          if attributes_with_errors.size > 1
+            output_buffer << "Sorry, there were problems with the #{attributes_with_errors.to_sentence}."
+          elsif attributes_with_errors.size == 1
+            output_buffer << "Sorry, there was a problem with the #{attributes_with_errors.first}."
+          else
+            output_buffer << "#{@record.class} #{@record.errors.on(:base)}."
+          end
+        end
+      end
+    end
+    
     def fieldset(&block)
       FormSan.content_tag(output_buffer, 'div', :class => 'fieldset') { block.call(self) }
     end
