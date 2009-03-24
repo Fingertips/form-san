@@ -1,6 +1,13 @@
 require File.expand_path('../helper', __FILE__)
 
+require 'models/book'
+
 class FormSanTest < ActiveSupport::TestCase
+  test "form_for should yield a form builder" do
+    form = FormSan.form_for(Book.new) {}
+    assert_equal '<form action="/books"></form>', form
+  end
+  
   test "converts a hash to HTML tag attributes" do
     assert_equal '', FormSan.hash_to_attributes({})
     assert_equal ' id="mine"', FormSan.hash_to_attributes({:id => 'mine'})
