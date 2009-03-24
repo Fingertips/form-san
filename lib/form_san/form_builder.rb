@@ -52,5 +52,13 @@ module FormSan
     def password_field(attribute, html_options={})
       input(attribute, html_options.reverse_merge(:type => 'password'))
     end
+    
+    def submit(label, html_options={})
+      html_options.reverse_merge!(
+        :value => label,
+        :type => 'submit'
+      )
+      FormSan.tag(output_buffer, 'input', html_options)
+    end
   end
 end

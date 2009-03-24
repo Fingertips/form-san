@@ -66,4 +66,14 @@ class FormBuilderTest < ActiveSupport::TestCase
     @builder.password_field(:password, :id => 'custom')
     assert_equal '<input type="password" name="book[password]" id="custom" />', @output_buffer
   end
+  
+  test "construct a submit button" do
+    @builder.submit('Save')
+    assert_equal '<input type="submit" value="Save" />', @output_buffer
+  end
+  
+  test "construct a submit button with a name" do
+    @builder.submit('Save', :name => 'continue')
+    assert_equal '<input type="submit" value="Save" name="continue" />', @output_buffer
+  end
 end
