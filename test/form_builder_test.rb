@@ -86,11 +86,9 @@ class FormBuilderTest < ActionView::TestCase
   
   test "field generates a text field with label and extra content" do
     form_for(@book, :builder => FormSan::FormBuilder) do |f|
-      concat(
-        f.field(:title, :type => :text) do
-          concat content_tag(:p, 'Titles are displayed on the book', :class => 'note')
-        end
-      )
+      f.field(:title, :type => :text) do
+        concat content_tag(:p, 'Titles are displayed on the book', :class => 'note')
+      end
     end
     assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" /><p class="note">Titles are displayed on the book</p></div>'
   end

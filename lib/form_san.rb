@@ -37,20 +37,27 @@ module FormSan
       end
     end
     
-    def field(attribute, *args, &block)
+    def field_without_block(attribute, extra_content=nil, *args)
       options = args.extract_options!
       classes = @object.errors.on(attribute) ? 'invalid field' : 'field'
+      
       @template.content_tag(:div, :class => classes) do
-        @template.concat(
-          @template.content_tag(:div, :class => 'label') do
-            @template.concat self.label(attribute, *args)
-          end
-        )
+        @template.concat(@template.content_tag(:div, :class => 'label') do
+          @template.concat self.label(attribute, *args)
+        end)
         @template.concat ActionView::Helpers::InstanceTag.new(@object_name,
           attribute, self, options.delete(:object)).to_input_field_tag(options.delete(:type), options)
         @template.concat error_message(attribute)
-        @template.concat @template.capture(&block) if block_given?
+        @template.concat extra_content unless extra_content.blank?
         @template.output_buffer # The block needs to return the current buffer
+      end
+    end
+    
+    def field(attribute, *args, &block)
+      if block_given?
+        @template.concat field_without_block(attribute, @template.capture(&block), *args)
+      else
+        field_without_block(attribute, nil, *args)
       end
     end
   end
