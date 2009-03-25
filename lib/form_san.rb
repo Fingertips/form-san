@@ -2,24 +2,27 @@ require 'action_view/helpers'
 
 module FormSan
   class FormBuilder < ActionView::Helpers::FormBuilder
+    attr_reader :template
+    delegate :concat, :content_tag, :to => :template
+    
     def fieldset(&block)
-      @template.content_tag(:div, :class => 'fieldset', &block)
+      content_tag(:div, :class => 'fieldset', &block)
     end
     
     def fields(&block)
-      @template.content_tag(:div, :class => 'fields', &block)
+      content_tag(:div, :class => 'fields', &block)
     end
     
     def error_messages
       unless @object.errors.count.zero?
         attributes_with_errors =  @object.errors.map { |attribute, _| attribute } - ['base']
-        @template.content_tag(:p, :class => 'errors') do
+        content_tag(:p, :class => 'errors') do
           if attributes_with_errors.size > 1
-            @template.concat "Sorry, there were problems with the #{attributes_with_errors.to_sentence}."
+            concat "Sorry, there were problems with the #{attributes_with_errors.to_sentence}."
           elsif attributes_with_errors.size == 1
-            @template.concat "Sorry, there was a problem with the #{attributes_with_errors.first}."
+            concat "Sorry, there was a problem with the #{attributes_with_errors.first}."
           else
-            @template.concat "#{@object.class} #{@object.errors.on(:base)}."
+            concat "#{@object.class} #{@object.errors.on(:base)}."
           end
         end
       else
@@ -29,8 +32,8 @@ module FormSan
     
     def error_message(attribute)
       unless @object.errors.on(attribute).blank?
-        @template.content_tag(:p, :class => 'notice') do
-          @template.concat ERB::Util.html_escape(@object.errors.on(attribute).mb_chars.capitalize)
+        content_tag(:p, :class => 'notice') do
+          concat ERB::Util.html_escape(@object.errors.on(attribute).mb_chars.capitalize)
         end
       else
         ''
@@ -43,8 +46,8 @@ module FormSan
       label_text = args.first || attribute.to_s.humanize
       label_text << ' <span>(optional)</span>' if options[:optional]
       
-      @template.content_tag(:div, :class => 'label') do
-        @template.concat label(attribute, label_text)
+      content_tag(:div, :class => 'label') do
+        concat label(attribute, label_text)
       end
     end
     
@@ -52,25 +55,25 @@ module FormSan
       options = args.extract_options!
       classes = @object.errors.on(attribute) ? 'invalid field' : 'field'
       
-      @template.content_tag(:div, :class => classes) do
-        @template.concat wrapped_label(attribute, args.first, :optional => options.delete(:optional))
+      content_tag(:div, :class => classes) do
+        concat wrapped_label(attribute, args.first, :optional => options.delete(:optional))
         
         case input_type = options.delete(:type).to_s
         when 'textarea'
-          @template.concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_text_area_tag(options)
+          concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_text_area_tag(options)
         else
-          @template.concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_input_field_tag(input_type, options)
+          concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_input_field_tag(input_type, options)
         end
         
-        @template.concat error_message(attribute)
-        @template.concat extra_content unless extra_content.blank?
+        concat error_message(attribute)
+        concat extra_content unless extra_content.blank?
         @template.output_buffer # The block needs to return the current buffer
       end
     end
     
     def field(attribute, *args, &block)
       if block_given?
-        @template.concat field_with_extra_content(attribute, @template.capture(&block), *args)
+        concat field_with_extra_content(attribute, @template.capture(&block), *args)
       else
         field_with_extra_content(attribute, nil, *args)
       end
