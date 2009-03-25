@@ -29,6 +29,18 @@ class FormSanTest < ActiveSupport::TestCase
     '<form action="/books" method="post"><div style="margin:0;padding:0"><input type="hidden" value="8KpxINP" name="authenticity_token" /></div></form>'
   end
   
+  test "form_for generates a hidden div with the put method" do
+    book = Book.create!
+    form = ''; FormSan.form_for(form, book) {}
+    assert_equal "<form method=\"post\" action=\"/books/#{book.id}\"><div style=\"margin:0;padding:0\"><input type=\"hidden\" value=\"put\" name=\"_method\" /></div></form>", form
+  end
+  
+  test "form_for uses just one hidden div for both the authenticity token and the put method" do
+    book = Book.create!
+    form = ''; FormSan.form_for(form, book, :authenticity_token => '8KpxINP') {}
+    assert_equal "<form method=\"post\" action=\"/books/#{book.id}\"><div style=\"margin:0;padding:0\"><input type=\"hidden\" value=\"put\" name=\"_method\" /><input type=\"hidden\" value=\"8KpxINP\" name=\"authenticity_token\" /></div></form>", form
+  end
+  
   test "converts a hash to HTML tag attributes" do
     assert_equal '', FormSan.helpers.send(:hash_to_attributes, {})
     assert_equal ' id="mine"', FormSan.helpers.send(:hash_to_attributes, {:id => 'mine'})
@@ -63,6 +75,21 @@ class FormSanTest < ActiveSupport::TestCase
     assert_equal '', output_buffer
     
     output_buffer = ''; FormSan.authenticity_token(output_buffer, { :authenticity_token => '8KpxINP'})
-    assert_equal '<div style="margin:0;padding:0"><input type="hidden" value="8KpxINP" name="authenticity_token" /></div>', output_buffer
+    assert_equal '<input type="hidden" value="8KpxINP" name="authenticity_token" />', output_buffer
+  end
+  
+  test "contructs HTML for a special method" do
+    output_buffer = ''; FormSan.method_hack(output_buffer, {})
+    assert_equal '', output_buffer
+    
+    %w(post get).each do |method|
+      output_buffer = ''; FormSan.method_hack(output_buffer, { :method => method})
+      assert_equal '', output_buffer
+    end
+    
+    %w(delete put options).each do |method|
+      output_buffer = ''; FormSan.method_hack(output_buffer, { :method => method})
+      assert_equal '<input type="hidden" value="' + method +'" name="_method" />', output_buffer
+    end
   end
 end
