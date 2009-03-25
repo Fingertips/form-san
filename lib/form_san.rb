@@ -27,9 +27,19 @@ module FormSan
       end
     end
     
+    def error_message(attribute)
+      unless @object.errors.on(attribute).blank?
+        @template.content_tag(:p, :class => 'notice') do
+          @template.concat ERB::Util.html_escape(@object.errors.on(attribute).mb_chars.capitalize)
+        end
+      else
+        ''
+      end
+    end
+    
     def field(attribute, *args, &block)
       options = args.extract_options!
-      classes = @object.errors.on(attribute) ? %w(field invalid) : %w(field)
+      classes = @object.errors.on(attribute) ? 'invalid field' : 'field'
       @template.content_tag(:div, :class => classes) do
         @template.concat(
           @template.content_tag(:div, :class => 'label') do
@@ -38,13 +48,16 @@ module FormSan
         )
         @template.concat ActionView::Helpers::InstanceTag.new(@object_name,
           attribute, self, options.delete(:object)).to_input_field_tag(options.delete(:type), options)
+        @template.concat error_message(attribute)
+        @template.concat @template.capture(&block) if block_given?
+        @template.output_buffer # The block needs to return the current buffer
       end
-      # FormSan.content_tag(output_buffer, 'div', :class => classes) do
-      #   label(attribute, options[:humanized])
-      #   input(attribute, html_options.merge(:type => options[:type]))
-      #   error_message(attribute)
-      #   output_buffer << block.call if block_given?
-      # end
     end
+  end
+end
+
+class ActionView::Helpers::InstanceTag
+  def error_wrapping(html_tag, has_error)
+    html_tag
   end
 end
