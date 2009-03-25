@@ -26,5 +26,25 @@ module FormSan
         ''
       end
     end
+    
+    def field(attribute, *args, &block)
+      options = args.extract_options!
+      classes = @object.errors.on(attribute) ? %w(field invalid) : %w(field)
+      @template.content_tag(:div, :class => classes) do
+        @template.concat(
+          @template.content_tag(:div, :class => 'label') do
+            @template.concat self.label(attribute, *args)
+          end
+        )
+        @template.concat ActionView::Helpers::InstanceTag.new(@object_name,
+          attribute, self, options.delete(:object)).to_input_field_tag(options.delete(:type), options)
+      end
+      # FormSan.content_tag(output_buffer, 'div', :class => classes) do
+      #   label(attribute, options[:humanized])
+      #   input(attribute, html_options.merge(:type => options[:type]))
+      #   error_message(attribute)
+      #   output_buffer << block.call if block_given?
+      # end
+    end
   end
 end
