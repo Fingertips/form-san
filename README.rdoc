@@ -2,11 +2,17 @@
 
 Form-San is a lean replacement for the Rails form builder.
 
-  <% FormSan.form_for(@book) do |f| %>
+  <% FormSan.form_for(output_buffer, @book, :authenticity_token => form_authenticity_token) do |f| %>
     <% f.fieldset do %>
+      <% f.error_messages %>
+      
       <% f.fields do %>
-        <f.text_field_with_label :email %>
+        <f.field :email, :type => :text %>
         <p class="note">We're not going to spam you.</p>
+
+        <% f.for(@book.author) do |a| %>
+          <% a.field :name, { :type => :text, :humanized => 'Full name' }, { :class => 'large' } %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
