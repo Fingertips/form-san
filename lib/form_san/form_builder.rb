@@ -10,7 +10,7 @@ module FormSan
     
     def error_messages(html_options={})
       unless @record.errors.count.zero?
-        FormSan.content_tag('p', html_options.reverse_merge(:class => 'errors')) do
+        FormSan.content_tag(output_buffer, 'p', html_options.reverse_merge(:class => 'errors')) do
           attributes_with_errors =  @record.errors.map { |attribute, _| attribute } - ['base']
           if attributes_with_errors.size > 1
             output_buffer << "Sorry, there were problems with the #{attributes_with_errors.to_sentence}."
@@ -19,6 +19,14 @@ module FormSan
           else
             output_buffer << "#{@record.class} #{@record.errors.on(:base)}."
           end
+        end
+      end
+    end
+    
+    def error_message(attribute, html_options={})
+      unless @record.errors.on(attribute).blank?
+        FormSan.content_tag(output_buffer, 'p', html_options.reverse_merge(:class => 'notice')) do
+          output_buffer << @record.errors.on(attribute).mb_chars.capitalize
         end
       end
     end
@@ -32,15 +40,19 @@ module FormSan
     end
     
     def field(attribute, options={}, html_options={}, &block)
-      FormSan.content_tag(output_buffer, 'div', :class => 'field') do
+      classes = %w(field)
+      classes << 'invalid' if @record.errors.on(attribute)
+      html_options.reverse_merge!(:value => self.class.value_before_type_cast(@record, attribute))
+      FormSan.content_tag(output_buffer, 'div', :class => classes) do
         label(attribute, options[:humanized])
         input(attribute, html_options.merge(:type => options[:type]))
+        error_message(attribute)
         output_buffer << block.call if block_given?
       end
     end
     
     def label(attribute, humanized_attribute=nil, html_options={}, &block)
-      humanized_attribute ||= attribute.to_s.humanize
+      humanized_attribute ||= @record.class.human_attribute_name(attribute.to_s)
       if block_given?
         FormSan.content_tag(output_buffer, 'label', html_options) do
           block.call(self)
@@ -78,6 +90,15 @@ module FormSan
         :type => 'submit'
       )
       FormSan.tag(output_buffer, 'input', html_options)
+    end
+    
+    def self.value_before_type_cast(object, attribute)
+      if object.respond_to?("#{attribute}_before_type_cast")
+        object.send("#{attribute}_before_type_cast")
+      else
+        object.send(attribute)
+      end
+    rescue NoMethodError
     end
   end
 end

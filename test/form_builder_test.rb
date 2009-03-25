@@ -115,14 +115,14 @@ class FormBuilderErrorMessagesTest < ActiveSupport::TestCase
   test "constructs a special error message for just one error" do
     @book.errors.add(:title, "can't be blank")
     @builder.error_messages
-    assert_equal 'Sorry, there was a problem with the title.', @output_buffer
+    assert_equal '<p class="errors">Sorry, there was a problem with the title.</p>', @output_buffer
   end
   
   test "constructs a special error message for two errors" do
     @book.errors.add(:title, "can't be blank")
     @book.errors.add(:isbn, "should be 13 characters long")
     @builder.error_messages
-    assert_equal 'Sorry, there were problems with the isbn and title.', @output_buffer
+    assert_equal '<p class="errors">Sorry, there were problems with the isbn and title.</p>', @output_buffer
   end
   
   test "constructs a special error message a lot of errors" do
@@ -130,12 +130,32 @@ class FormBuilderErrorMessagesTest < ActiveSupport::TestCase
     @book.errors.add(:isbn, "should be 13 characters long")
     @book.errors.add(:published, "is not possible right now")
     @builder.error_messages
-    assert_equal 'Sorry, there were problems with the isbn, title, and published.', @output_buffer
+    assert_equal '<p class="errors">Sorry, there were problems with the isbn, title, and published.</p>', @output_buffer
   end
   
   test "constructs a proper error message with only errors on base" do
     @book.errors.add_to_base("can't be about bunnies")
     @builder.error_messages
-    assert_equal "Book can't be about bunnies.", @output_buffer
+    assert_equal '<p class="errors">Book can\'t be about bunnies.</p>', @output_buffer
+  end
+  
+  test "shows errors on a field" do
+    @book.errors.add(:title, "can't be blank")
+    @builder.field(:title, :type => :text)
+     assert_equal '<div class="field invalid"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" id="book_title" /><p class="notice">Can\'t be blank</p></div>', @output_buffer
+  end
+end
+
+class FormBuilderForRecordWithAttributes < ActiveSupport::TestCase
+  def setup
+    @book = Book.new
+    @output_buffer = ''
+    @builder = FormSan::FormBuilder.new(@output_buffer, @book)
+  end
+  
+  test "construct a composite text field with a value" do
+    @book.title = 'Empire of the Sun'
+    @builder.field(:title, :type => :text)
+    assert_equal '<div class="field"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" value="Empire of the Sun" id="book_title" /></div>', @output_buffer
   end
 end
