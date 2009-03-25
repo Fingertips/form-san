@@ -4,4 +4,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string :isbn
     t.boolean :published, :default => false
   end
+  
+  create_table :authors do |t|
+    t.string :name
+  end
 end

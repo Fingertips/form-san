@@ -24,10 +24,10 @@ ENV['RAILS_ENV'] = 'test'
 
 # Rails libs
 begin
-  require 'active_support'
-  require 'active_support/test_case'
-  require 'active_record'
   require 'action_controller'
+  require 'action_controller/cgi_ext'
+  require 'action_controller/test_process'
+  require 'action_view/test_case'
 rescue LoadError
   raise "Please install Form-San as Rails plugin before running the tests."
 end
@@ -37,10 +37,6 @@ require File.expand_path('../../rails/init', __FILE__)
 # Libraries for testing
 require 'rubygems' rescue LoadError
 require 'mocha'
-
-# Establish connection with an in-memory Sqlite database
-ActiveRecord::Base.establish_connection({'adapter' => 'sqlite3', 'database' => ':memory:'})
-require 'schema'
 
 # Load Routes
 require 'routes'

@@ -1,161 +1,58 @@
 require File.expand_path('../helper', __FILE__)
 
-require 'models/book'
-
-class FormBuilderTest < ActiveSupport::TestCase
-  def setup
-    @output_buffer = ''
-    @builder = FormSan::FormBuilder.new(@output_buffer, Book.new)
-  end
-  
-  test "construct a fieldset with contents" do
-    @builder.fieldset { @output_buffer << 'content' }
-    assert_equal '<div class="fieldset">content</div>', @output_buffer
-  end
-  
-  test "construct a group of fields with content" do
-    @builder.fields { @output_buffer << 'content' }
-    assert_equal '<div class="fields">content</div>', @output_buffer
-  end
-  
-  test "construct a label" do
-    @builder.label :published
-    assert_equal '<div class="label"><label for="book_published">Published</label></div>', @output_buffer
-  end
-  
-  test "construct a label with humanized attribute" do
-    @builder.label :published, 'Visible online'
-    assert_equal '<div class="label"><label for="book_published">Visible online</label></div>', @output_buffer
-  end
-  
-  test "construct a custom label with contents" do
-    @builder.label(:published) do
-      @output_buffer << '<input type="checkbox" name="make" value="money" />'
-    end
-    assert_equal '<label><input type="checkbox" name="make" value="money" /> Published</label>', @output_buffer
-  end
-  
-  test "construct a custom label with contents and humanized attribute" do
-    @builder.label(:published, 'Visible online') do
-      @output_buffer << '<input type="checkbox" name="make" value="money" />'
-    end
-    assert_equal '<label><input type="checkbox" name="make" value="money" /> Visible online</label>', @output_buffer
-  end
-  
-  test "construct a text field" do
-    @builder.text_field(:title)
-    assert_equal '<input type="text" name="book[title]" id="book_title" />', @output_buffer
-  end
-  
-  test "construct a text field with custom id" do
-    @builder.text_field(:title, :id => 'custom')
-    assert_equal '<input type="text" name="book[title]" id="custom" />', @output_buffer
-  end
-  
-  test "construct a password field" do
-    @builder.password_field(:password)
-    assert_equal '<input type="password" name="book[password]" id="book_password" />', @output_buffer
-  end
-  
-  test "construct a password field with custom id" do
-    @builder.password_field(:password, :id => 'custom')
-    assert_equal '<input type="password" name="book[password]" id="custom" />', @output_buffer
-  end
-  
-  test "construct a submit button" do
-    @builder.submit('Save')
-    assert_equal '<input type="submit" value="Save" />', @output_buffer
-  end
-  
-  test "construct a submit button with a name" do
-    @builder.submit('Save', :name => 'continue')
-    assert_equal '<input type="submit" value="Save" name="continue" />', @output_buffer
-  end
-  
-  test "construct a composite text field" do
-    @builder.field(:title, :type => :text)
-    assert_equal '<div class="field"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" id="book_title" /></div>', @output_buffer
-  end
-  
-  test "contruct a composite password field " do
-    @builder.field(:password, :type => :password)
-    assert_equal '<div class="field"><div class="label"><label for="book_password">Password</label></div><input type="password" name="book[password]" id="book_password" /></div>', @output_buffer
-  end
-  
-  test "construct a composite text field with alternative humanize name" do
-    @builder.field(:title, :type => :text, :humanized => 'The Title')
-    assert_equal '<div class="field"><div class="label"><label for="book_title">The Title</label></div><input type="text" name="book[title]" id="book_title" /></div>', @output_buffer
-  end
-  
-  test "construct a composite text field with html attributes" do
-    @builder.field(:title, { :type => :text, :humanized => 'The Title' }, { :class => 'medium' })
-    assert_equal '<div class="field"><div class="label"><label for="book_title">The Title</label></div><input type="text" class="medium" name="book[title]" id="book_title" /></div>', @output_buffer
-  end
-  
-  test "construct a composite text field with extra contents" do
-    @builder.field(:title, :type => :text) do
-      '<p class="note">Used in the hover text for books.</p>'
-    end
-    assert_equal '<div class="field"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" id="book_title" /><p class="note">Used in the hover text for books.</p></div>', @output_buffer
+class BooksController
+  def url_for(options)
+    '/books/all'
   end
 end
 
-class FormBuilderErrorMessagesTest < ActiveSupport::TestCase
+class FormBuilderTest < ActionView::TestCase
+  tests ActionView::Helpers::FormHelper
+  
+  cattr_accessor :protect_against_forgery
+  attr_accessor :output_buffer
+  
   def setup
-    @book = Book.new
-    @output_buffer = ''
-    @builder = FormSan::FormBuilder.new(@output_buffer, @book)
+    output_buffer = ''
+    
+    @controller = BooksController.new
+    @book = stub(:title => 'Empire of the Sun')
   end
   
-  test "constructs a blank string when there are no error messages" do
-    @builder.error_messages
-    assert_equal '', @output_buffer
+  test "form_for still works" do
+    form_for(:post, @post, :builder => FormSan::FormBuilder) do |f| end
+    assert_generated '<form action="/books/all" method="post"></form>'
   end
   
-  test "constructs a special error message for just one error" do
-    @book.errors.add(:title, "can't be blank")
-    @builder.error_messages
-    assert_equal '<p class="errors">Sorry, there was a problem with the title.</p>', @output_buffer
+  test "fieldset wraps a set of field groups" do
+    form_for(:post, @post, :builder => FormSan::FormBuilder) do |f|
+      concat f.fieldset {}
+    end
+    assert_generated_in_form '<div class="fieldset"></div>'
   end
   
-  test "constructs a special error message for two errors" do
-    @book.errors.add(:title, "can't be blank")
-    @book.errors.add(:isbn, "should be 13 characters long")
-    @builder.error_messages
-    assert_equal '<p class="errors">Sorry, there were problems with the isbn and title.</p>', @output_buffer
+  test "fields wraps a group of fields" do
+    form_for(:post, @post, :builder => FormSan::FormBuilder) do |f|
+      concat f.fields {}
+    end
+    assert_generated_in_form '<div class="fields"></div>'
   end
   
-  test "constructs a special error message a lot of errors" do
-    @book.errors.add(:title, "can't be blank")
-    @book.errors.add(:isbn, "should be 13 characters long")
-    @book.errors.add(:published, "is not possible right now")
-    @builder.error_messages
-    assert_equal '<p class="errors">Sorry, there were problems with the isbn, title, and published.</p>', @output_buffer
+  private
+  
+  def assert_generated(expected)
+    assert_equal expected, output_buffer
   end
   
-  test "constructs a proper error message with only errors on base" do
-    @book.errors.add_to_base("can't be about bunnies")
-    @builder.error_messages
-    assert_equal '<p class="errors">Book can\'t be about bunnies.</p>', @output_buffer
+  def assert_generated_in_form(expected)
+    if match = /<form[^>]+>(.*)<\/form>/.match(output_buffer)
+      assert_equal expected, match[1]
+    else
+      flunk "There is no form in the output: #{output_buffer.inspect}"
+    end
   end
   
-  test "shows errors on a field" do
-    @book.errors.add(:title, "can't be blank")
-    @builder.field(:title, :type => :text)
-     assert_equal '<div class="field invalid"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" id="book_title" /><p class="notice">Can\'t be blank</p></div>', @output_buffer
-  end
-end
-
-class FormBuilderForRecordWithAttributes < ActiveSupport::TestCase
-  def setup
-    @book = Book.new
-    @output_buffer = ''
-    @builder = FormSan::FormBuilder.new(@output_buffer, @book)
-  end
-  
-  test "construct a composite text field with a value" do
-    @book.title = 'Empire of the Sun'
-    @builder.field(:title, :type => :text)
-    assert_equal '<div class="field"><div class="label"><label for="book_title">Title</label></div><input type="text" name="book[title]" value="Empire of the Sun" id="book_title" /></div>', @output_buffer
+  def protect_against_forgery?
+    protect_against_forgery
   end
 end
