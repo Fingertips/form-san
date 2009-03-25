@@ -17,7 +17,7 @@ module FormSan
         method_hack(extra_html, options)
         authenticity_token(extra_html, options)
         
-        invisible(output_buffer, record, options) do
+        invisible(output_buffer) do
           output_buffer << extra_html
         end unless extra_html.blank?
         
@@ -35,10 +35,10 @@ module FormSan
       output_buffer << "<#{name}#{hash_to_attributes(html_options)} />"
     end
     
-    def invisible(output_buffer, record, options, &block)
+    def invisible(output_buffer, &block)
       content_tag(output_buffer, 'div', :style => 'margin:0;padding:0') do
         block.call
-      end if options[:method]
+      end
     end
     
     def method_hack(output_buffer, options)

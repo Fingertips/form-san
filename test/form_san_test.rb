@@ -70,6 +70,11 @@ class FormSanTest < ActiveSupport::TestCase
     assert_equal '<div class="current active"></div>', output_buffer
   end
   
+  test "constructs HTML for an invisible div" do
+    output_buffer = ''; FormSan.invisible(output_buffer) {}
+    assert_equal '<div style="margin:0;padding:0"></div>', output_buffer
+  end
+  
   test "constructs HTML for an authenticity token" do
     output_buffer = ''; FormSan.authenticity_token(output_buffer, {})
     assert_equal '', output_buffer
