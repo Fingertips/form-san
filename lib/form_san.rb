@@ -45,8 +45,14 @@ module FormSan
         @template.concat(@template.content_tag(:div, :class => 'label') do
           @template.concat self.label(attribute, *args)
         end)
-        @template.concat ActionView::Helpers::InstanceTag.new(@object_name,
-          attribute, self, @object).to_input_field_tag(options.delete(:type), options)
+        
+        case input_type = options.delete(:type).to_s
+        when 'textarea'
+          @template.concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_text_area_tag(options)
+        else
+          @template.concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_input_field_tag(input_type, options)
+        end
+        
         @template.concat error_message(attribute)
         @template.concat extra_content unless extra_content.blank?
         @template.output_buffer # The block needs to return the current buffer

@@ -79,6 +79,16 @@ class FormBuilderTest < ActionView::TestCase
     assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" /></div>'
   end
   
+  test "field generates a password field with label" do
+    form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :password) end
+    assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="password" /></div>'
+  end
+  
+  test "field generates a textarea with label" do
+    form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :textarea) end
+    assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><textarea cols="40" id="book_title" name="book[title]" rows="20"></textarea></div>'
+  end
+  
   test "field generates a text field with label with specified humanized name" do
     form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, 'Cover title', :type => :text) end
     assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Cover title</label></div><input id="book_title" name="book[title]" size="30" type="text" /></div>'
