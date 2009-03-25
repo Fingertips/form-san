@@ -1,18 +1,64 @@
 require 'action_view/helpers'
 
 module FormSan
+  # = FormSan::FormBuilder
+  # 
+  # FormSan has two goals:
+  # * Make it easier for the developer to write out a form
+  # * Make the resulting form more usable
+  #
+  # You can use the form builder by specifying it in the <tt>:builder</tt> option in <tt>form_for</tt>.
+  #
+  #   form_for(@post, :builder => FormSan::FormBuilder)
+  #
+  # You can also make it the default form builder by specifying it in an initializer or <tt>environment.rb</tt>.
+  #
+  #   ActionView::Base.default_form_builder = FormSan::FormBuilder
   class FormBuilder < ActionView::Helpers::FormBuilder
     attr_reader :template
     delegate :concat, :content_tag, :to => :template
     
+    # Wraps its content in a div with a fieldset class. You use it to group sets of fields.
+    #
+    #   <% f.fieldset do %>
+    #     <p>Please complete the form.</p>
+    #     …
+    #   <% end %>
+    #
+    # Generates
+    #
+    #   <div class="fieldset">
+    #     <p>Please complete the form.</p>
+    #     …
+    #   </div>
     def fieldset(&block)
       content_tag(:div, :class => 'fieldset', &block)
     end
     
+    # Wraps its content in a div with a fields class. You use it to group fields.
+    #
+    #   <% f.fields do %>
+    #     <h4>Personal information</h4>
+    #     …
+    #   <% end %>
+    #
+    # Generates
+    #
+    #   <div class="fields">
+    #     <h4>Personal information</h4>
+    #     …
+    #   </div>
     def fields(&block)
       content_tag(:div, :class => 'fields', &block)
     end
     
+    # Generates a short sentence in a paragraph describing which attributes have validation errors.
+    #
+    #   <% f.error_messages %>
+    #
+    # Generates something like
+    #
+    #   <p class="errors">Sorry, there were problems with the title, published date, and description.</p>
     def error_messages
       unless @object.errors.count.zero?
         attributes_with_errors =  @object.errors.map { |attribute, _| attribute } - ['base']
@@ -30,6 +76,13 @@ module FormSan
       end
     end
     
+    # Generates a short in a paragraph with the validation error of a specific attribute.
+    #
+    #   <% f.error_message(:title) %>
+    #
+    # Generates something like
+    #
+    #   <p class="notice">Can't be blank</p>
     def error_message(attribute)
       unless @object.errors.on(attribute).blank?
         content_tag(:p, :class => 'notice') do
