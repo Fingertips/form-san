@@ -9,7 +9,9 @@ module FormSan
     protected :default_url_options, :default_url_options=
     
     def form_for(output_buffer, record, options={}, &block)
-      content_tag(output_buffer, 'form', :action => polymorphic_path(record)) do
+      method = record.new_record? ? :post : :put
+      content_tag(output_buffer, 'form', :action => polymorphic_path(record), :method => method) do
+        authenticity_token(output_buffer, options)
         block.call(FormSan::FormBuilder.new(output_buffer, record, options)) if block_given?
       end
     end
@@ -22,6 +24,14 @@ module FormSan
     
     def tag(output_buffer, name, html_options={})
       output_buffer << "<#{name}#{hash_to_attributes(html_options)} />"
+    end
+    
+    def authenticity_token(output_buffer, options={})
+      if options[:authenticity_token]
+        content_tag(output_buffer, 'div', :style => 'margin:0;padding:0') do
+          tag(output_buffer, 'input', :type => "hidden", :name => 'authenticity_token', :value => options[:authenticity_token]) 
+        end
+      end
     end
     
     private

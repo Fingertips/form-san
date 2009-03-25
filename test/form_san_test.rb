@@ -13,9 +13,20 @@ class FormSanTest < ActiveSupport::TestCase
     end
   end
   
-  test "form_for should yield a form builder" do
+  test "form_for constructs a form tag" do
     form = ''; FormSan.form_for(form, Book.new) {}
-    assert_equal '<form action="/books"></form>', form
+    assert_equal '<form method="post" action="/books"></form>', form
+  end
+  
+  test "form_for yields a form builder" do
+    form = ''; builder = nil
+    FormSan.form_for(form, Book.new) { |f| builder = f }
+    assert builder.kind_of?(FormSan::FormBuilder)
+  end
+  
+  test "form_for generates a hidden div with an authenticity token" do
+    form = ''; FormSan.form_for(form, Book.new, :authenticity_token => '8KpxINP') {}
+    '<form action="/books" method="post"><div style="margin:0;padding:0"><input type="hidden" value="8KpxINP" name="authenticity_token" /></div></form>'
   end
   
   test "converts a hash to HTML tag attributes" do
@@ -45,5 +56,13 @@ class FormSanTest < ActiveSupport::TestCase
     assert_equal '<div class="current"></div>', output_buffer
     output_buffer = ''; FormSan.content_tag(output_buffer, :div, :class => %w(current active))
     assert_equal '<div class="current active"></div>', output_buffer
+  end
+  
+  test "constructs HTML for an authenticity token" do
+    output_buffer = ''; FormSan.authenticity_token(output_buffer, {})
+    assert_equal '', output_buffer
+    
+    output_buffer = ''; FormSan.authenticity_token(output_buffer, { :authenticity_token => '8KpxINP'})
+    assert_equal '<div style="margin:0;padding:0"><input type="hidden" value="8KpxINP" name="authenticity_token" /></div>', output_buffer
   end
 end
