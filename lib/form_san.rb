@@ -37,16 +37,23 @@ module FormSan
       end
     end
     
-    def field_without_block(attribute, extra_content=nil, *args)
+    def wrapped_label(attribute, *args)
+      options = args.extract_options!
+            
+      label_text = args.first || attribute.to_s.humanize
+      label_text << ' <span>(optional)</span>' if options[:optional]
+      
+      @template.content_tag(:div, :class => 'label') do
+        @template.concat label(attribute, label_text)
+      end
+    end
+    
+    def field_with_extra_content(attribute, extra_content=nil, *args)
       options = args.extract_options!
       classes = @object.errors.on(attribute) ? 'invalid field' : 'field'
       
       @template.content_tag(:div, :class => classes) do
-        @template.concat(@template.content_tag(:div, :class => 'label') do
-          label_text = args.first || attribute.to_s.humanize
-          label_text << ' <span>(optional)</span>' if options.delete(:optional)
-          @template.concat self.label(attribute, label_text)
-        end)
+        @template.concat wrapped_label(attribute, args.first, :optional => options.delete(:optional))
         
         case input_type = options.delete(:type).to_s
         when 'textarea'
@@ -63,9 +70,9 @@ module FormSan
     
     def field(attribute, *args, &block)
       if block_given?
-        @template.concat field_without_block(attribute, @template.capture(&block), *args)
+        @template.concat field_with_extra_content(attribute, @template.capture(&block), *args)
       else
-        field_without_block(attribute, nil, *args)
+        field_with_extra_content(attribute, nil, *args)
       end
     end
   end

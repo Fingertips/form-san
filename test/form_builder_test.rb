@@ -74,6 +74,17 @@ class FormBuilderTest < ActionView::TestCase
     assert_generated_in_form '<p class="errors">Book can\'t be about bunnies.</p>'
   end
   
+  test "wrapped_label generates a label in a div" do
+    form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.wrapped_label(:title) end
+      assert_generated_in_form '<div class="label"><label for="book_title">Title</label></div>'
+  end
+  
+  test "wrapped_label generates a label in a div marked as optional" do
+    form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.wrapped_label(:title, :optional => true) end
+      assert_generated_in_form '<div class="label"><label for="book_title">Title <span>(optional)</span></label></div>'
+  end
+  
+  
   test "field generates a text field with label" do
     form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :text) end
     assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" /></div>'
