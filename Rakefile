@@ -25,9 +25,9 @@ begin
     
     s.email = "manfred@fngtps.com"
     s.homepage = "http://github.com/Fingertips/form-san"
-    s.summary =  "A lean replacement form builder for Rails."
-    s.description = "A lean replacement form builder for Rails."
+    s.description = "A form builder for ActionView."
+    s.summary =  "Form-San is a form builder that makes it slightly easier to create fields with labels and validation messages."
     s.authors = ["Manfred Stienstra"]
-    s.files = %w(lib/form_san.rb lib/form_san/form_builder.rb rails/init.rb)
+    s.files = %w(lib/form_san.rb rails/init.rb)
   end
 end

@@ -1,3 +1,27 @@
 = Form-San
 
 Form-San is a lean extension for the Rails form builder.
+
+  <% form_for(@member, :builder => FormSan::FormBuilder) do |f| %>
+    <% f.fieldset do %>
+      <% f.fields do %>
+        <%= f.error_messages %>
+        
+        <% f.field(:email, :type => :text, :class => 'medium') do %>
+          <p class="hint">You’ll log in using your email address.</p>
+        <% end %>
+        <%= f.field(:password, :type => :password) %>
+      
+        <% f.fields_for(@member.artist) do |a| %>
+          <% a.field(:name, :type => :text, :class => 'medium') do %>
+            <p class="hint">Shown on the site.</p>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+    
+    <div class="submit">
+      <%= f.submit 'Sign up' %>
+      <%= link_to 'Cancel', root_path, :class => 'cancel' %>
+    </div>
+  <% end %>
