@@ -24,6 +24,7 @@ ENV['RAILS_ENV'] = 'test'
 
 # Rails libs
 begin
+  require 'activerecord'
   require 'action_controller'
   require 'action_controller/cgi_ext'
   require 'action_controller/test_process'
@@ -37,6 +38,11 @@ require File.expand_path('../../rails/init', __FILE__)
 # Libraries for testing
 require 'rubygems' rescue LoadError
 require 'mocha'
+
+# Open a connection for ActiveRecord
+ActiveRecord::Base.establish_connection('adapter' => 'sqlite3', 'database' => ':memory:')
+require 'models/book'
+require 'schema'
 
 # Load Routes
 require 'routes'
