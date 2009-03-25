@@ -94,6 +94,11 @@ class FormBuilderTest < ActionView::TestCase
     assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Cover title</label></div><input id="book_title" name="book[title]" size="30" type="text" /></div>'
   end
   
+  test "field generates a text field with label that is marked optional" do
+    form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :text, :optional => true) end
+    assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title <span>(optional)</span></label></div><input id="book_title" name="book[title]" size="30" type="text" /></div>'
+  end
+  
   test "field generates a text field with label and extra content" do
     form_for(@book, :builder => FormSan::FormBuilder) do |f|
       f.field(:title, :type => :text) do

@@ -43,7 +43,9 @@ module FormSan
       
       @template.content_tag(:div, :class => classes) do
         @template.concat(@template.content_tag(:div, :class => 'label') do
-          @template.concat self.label(attribute, *args)
+          label_text = args.first || attribute.to_s.humanize
+          label_text << ' <span>(optional)</span>' if options.delete(:optional)
+          @template.concat self.label(attribute, label_text)
         end)
         
         case input_type = options.delete(:type).to_s
