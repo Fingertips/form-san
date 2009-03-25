@@ -46,7 +46,7 @@ module FormSan
           @template.concat self.label(attribute, *args)
         end)
         @template.concat ActionView::Helpers::InstanceTag.new(@object_name,
-          attribute, self, options.delete(:object)).to_input_field_tag(options.delete(:type), options)
+          attribute, self, @object).to_input_field_tag(options.delete(:type), options)
         @template.concat error_message(attribute)
         @template.concat extra_content unless extra_content.blank?
         @template.output_buffer # The block needs to return the current buffer

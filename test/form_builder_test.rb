@@ -99,6 +99,12 @@ class FormBuilderTest < ActionView::TestCase
     assert_generated_in_form '<div class="invalid field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" /><p class="notice">Can\'t be blank</p></div>'
   end
   
+  test "field adds attribute values messages to it's content" do
+    @book.title = 'Empire of the Sun'
+    form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :text) end
+    assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" value="Empire of the Sun" /></div>'
+  end
+  
   private
   
   def assert_generated(expected)
