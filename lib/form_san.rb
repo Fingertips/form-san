@@ -104,14 +104,23 @@ module FormSan
     #
     #   <%= f.label(:title, :optional => true) %>
     #   <div class="label"><label for="book_title">Title <span>(optional)</span></label></div>
+    #
+    # When there is a validation error on the attribute, this will also be reflected in the HTML.
+    #
+    #   <%= f.label(:title) %>
+    #   <div class="label">
+    #     <label for="book_title">Title <span>(optional)</span></label>
+    #     <p class="notice">Can't be blank.</p>
+    #   </div>
     def wrapped_label(attribute, *args)
       options = args.extract_options!
-            
+      
       label_text = args.first || attribute.to_s.humanize
       label_text << ' <span>(optional)</span>' if options[:optional]
       
       content_tag(:div, :class => 'label') do
         concat label(attribute, label_text)
+        concat error_message(attribute)
       end
     end
     
@@ -129,7 +138,6 @@ module FormSan
           concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_input_field_tag(input_type, options)
         end
         
-        concat error_message(attribute)
         concat extra_content unless extra_content.blank?
         @template.output_buffer # The block needs to return the current buffer
       end
