@@ -54,7 +54,7 @@ module FormSan
     
     # Generates a short sentence in a paragraph describing which attributes have validation errors.
     #
-    #   <% f.error_messages %>
+    #   <%= f.error_messages %>
     #
     # Generates something like
     #
@@ -78,7 +78,7 @@ module FormSan
     
     # Generates a short in a paragraph with the validation error of a specific attribute.
     #
-    #   <% f.error_message(:title) %>
+    #   <%= f.error_message(:title) %>
     #
     # Generates something like
     #
@@ -93,6 +93,17 @@ module FormSan
       end
     end
     
+    # Generates a label for an attribute wrapped in a div. It allows you to specify an alternative
+    # humanized form of the attribute name and whether the associated field is optional or not.
+    #
+    #   <%= f.label(:title) %>
+    #   <div class="label"><label for="book_title">Title</label></div>
+    #
+    #   <%= f.label(:title, 'Book title') %>
+    #   <div class="label"><label for="book_title">Book title</label></div>
+    #
+    #   <%= f.label(:title, :optional => true) %>
+    #   <div class="label"><label for="book_title">Title <span>(optional)</span></label></div>
     def wrapped_label(attribute, *args)
       options = args.extract_options!
             
@@ -104,7 +115,7 @@ module FormSan
       end
     end
     
-    def field_with_extra_content(attribute, extra_content=nil, *args)
+    def field_with_extra_content(attribute, extra_content=nil, *args) #:nodoc:
       options = args.extract_options!
       classes = @object.errors.on(attribute) ? 'invalid field' : 'field'
       
@@ -124,6 +135,42 @@ module FormSan
       end
     end
     
+    # Generates a field of a certain type wrapped in all sorts of HTML.
+    #
+    #   <%= f.field(:title, :type => :text) %>
+    #   <div class="field">
+    #     <div class="label"><label for="book_title">Title</label></div>
+    #     <input id="book_title" type="text" name="book[title]" value="Empire of the Sun" />
+    #   </div>
+    #
+    # When there is a validation error on the attribute, this will also be reflected in the HTML.
+    #
+    #   <div class="invalid field">
+    #     <div class="label"><label for="book_title">Title</label></div>
+    #     <input id="book_title" type="text" name="book[title]" value="" />
+    #     <p class="notice">Can't be blank.</p>
+    #   </div>
+    #
+    # You can also pass a block to field, that way you can include more HTML into the div.
+    #
+    #   <% f.field(:title, :type => :text) do %>
+    #     <p class="note">This will be shown on the overview page as the book title.</p>
+    #   <% end %>
+    #
+    #   <div class="field">
+    #     <div class="label"><label for="book_title">Title</label></div>
+    #     <input id="book_title" type="text" name="book[title]" value="Empire of the Sun" />
+    #     <p class="note">This will be shown on the overview page as the book title.</p>
+    #   </div>
+    #
+    # All options except <tt>:type</tt> are passed to the input.
+    #
+    #   <%= f.field(:title, :type => :text, :class => 'small') %>
+    #
+    #   <div class="field">
+    #     <div class="label"><label for="book_title">Title</label></div>
+    #     <input id="book_title" type="text" name="book[title]" value="Empire of the Sun" class="small" />
+    #   </div>
     def field(attribute, *args, &block)
       if block_given?
         concat field_with_extra_content(attribute, @template.capture(&block), *args)
