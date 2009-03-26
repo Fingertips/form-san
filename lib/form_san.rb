@@ -181,8 +181,12 @@ module FormSan
   end
 end
 
-class ActionView::Helpers::InstanceTag
-  def error_wrapping(html_tag, has_error)
-    html_tag
+module ActionView #:nodoc:
+  module Helpers #:nodoc:
+    class InstanceTag #:nodoc:
+      def error_wrapping(html_tag, has_error)
+        html_tag
+      end
+    end
   end
 end
