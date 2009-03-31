@@ -93,6 +93,19 @@ module FormSan
       end
     end
     
+    def wrapped_label_with_extra_content(attribute, extra_content=nil, *args) #:nodoc:
+      options = args.extract_options!
+      
+      label_text = args.first || attribute.to_s.humanize
+      label_text << ' <span>(optional)</span>' if options[:optional]
+      
+      content_tag(:div, :class => 'label') do
+        concat label(attribute, label_text)
+        concat extra_content unless extra_content.blank?
+        @template.output_buffer # The block needs to return the current buffer
+      end
+    end
+    
     # Generates a label for an attribute wrapped in a div. It allows you to specify an alternative
     # humanized form of the attribute name and whether the associated field is optional or not.
     #
@@ -105,22 +118,17 @@ module FormSan
     #   <%= f.label(:title, :optional => true) %>
     #   <div class="label"><label for="book_title">Title <span>(optional)</span></label></div>
     #
-    # When there is a validation error on the attribute, this will also be reflected in the HTML.
+    # You can also pass a block to field, that way you can include more HTML into the div.
     #
-    #   <%= f.label(:title) %>
-    #   <div class="label">
-    #     <label for="book_title">Title <span>(optional)</span></label>
-    #     <p class="notice">Can't be blank.</p>
-    #   </div>
-    def wrapped_label(attribute, *args)
-      options = args.extract_options!
-      
-      label_text = args.first || attribute.to_s.humanize
-      label_text << ' <span>(optional)</span>' if options[:optional]
-      
-      content_tag(:div, :class => 'label') do
-        concat label(attribute, label_text)
-        concat error_message(attribute)
+    #   <% f.label(:year) do %>
+    #     <span>(please fill out in YYYY format)</span>
+    #   <% end %>
+    #   <div class="label"><label for="book_title">Title <span>(optional)</span></label></div>
+    def wrapped_label(attribute, *args, &block)
+      if block_given?
+        concat wrapped_label_with_extra_content(attribute, @template.capture(&block), *args)
+      else
+        wrapped_label_with_extra_content(attribute, nil, *args)
       end
     end
     
@@ -129,13 +137,16 @@ module FormSan
       classes = @object.errors.on(attribute) ? 'invalid field' : 'field'
       
       content_tag(:div, :class => classes) do
-        concat wrapped_label(attribute, args.first, :optional => options.delete(:optional))
-        
         case input_type = options.delete(:type).to_s
         when 'textarea'
+          wrapped_label(attribute, args.first, :optional => options.delete(:optional)) do
+            concat error_message(attribute)
+          end
           concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_text_area_tag(options)
         else
+          concat wrapped_label(attribute, args.first, :optional => options.delete(:optional))
           concat ActionView::Helpers::InstanceTag.new(@object_name, attribute, self, @object).to_input_field_tag(input_type, options)
+          concat error_message(attribute)
         end
         
         concat extra_content unless extra_content.blank?

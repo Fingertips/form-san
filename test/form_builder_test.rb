@@ -76,12 +76,21 @@ class FormBuilderTest < ActionView::TestCase
   
   test "wrapped_label generates a label in a div" do
     form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.wrapped_label(:title) end
-      assert_generated_in_form '<div class="label"><label for="book_title">Title</label></div>'
+    assert_generated_in_form '<div class="label"><label for="book_title">Title</label></div>'
   end
   
   test "wrapped_label generates a label in a div marked as optional" do
     form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.wrapped_label(:title, :optional => true) end
-      assert_generated_in_form '<div class="label"><label for="book_title">Title <span>(optional)</span></label></div>'
+    assert_generated_in_form '<div class="label"><label for="book_title">Title <span>(optional)</span></label></div>'
+  end
+  
+  test "wrapped_label generates a label with extra content" do
+    form_for(@book, :builder => FormSan::FormBuilder) do |f|
+      f.wrapped_label(:title) do
+        concat content_tag(:span, '(en)')
+      end
+    end
+    assert_generated_in_form '<div class="label"><label for="book_title">Title</label><span>(en)</span></div>'
   end
   
   test "field generates a text field with label" do
@@ -118,13 +127,29 @@ class FormBuilderTest < ActionView::TestCase
     assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" /><p class="note">Titles are displayed on the book</p></div>'
   end
   
-  test "field adds validation errors messages to it's content" do
+  test "field adds validation error messages to its content" do
     @book.errors.add(:title, "can't be blank")
     form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :text) end
-    assert_generated_in_form '<div class="invalid field"><div class="label"><label for="book_title">Title</label><p class="notice">Can\'t be blank</p></div><input id="book_title" name="book[title]" size="30" type="text" /></div>'
+    assert_generated_in_form '<div class="invalid field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" /><p class="notice">Can\'t be blank</p></div>'
   end
   
-  test "field adds attribute values messages to it's content" do
+  test "field adds validation error messages to its label div for textareas" do
+    @book.errors.add(:title, "can't be blank")
+    form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :textarea) end
+    assert_generated_in_form '<div class="invalid field"><div class="label"><label for="book_title">Title</label><p class="notice">Can\'t be blank</p></div><textarea cols="40" id="book_title" name="book[title]" rows="20"></textarea></div>'
+  end
+  
+  test "field add validation error messages before extra content" do
+    @book.errors.add(:title, "can't be blank")
+    form_for(@book, :builder => FormSan::FormBuilder) do |f|
+      f.field(:title, :type => :text) do
+        concat content_tag(:p, 'Titles are displayed on the book', :class => 'note')
+      end
+    end
+    assert_generated_in_form '<div class="invalid field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" /><p class="notice">Can\'t be blank</p><p class="note">Titles are displayed on the book</p></div>'
+  end
+  
+  test "field adds attribute values the input tag" do
     @book.title = 'Empire of the Sun'
     form_for(@book, :builder => FormSan::FormBuilder) do |f| concat f.field(:title, :type => :text) end
     assert_generated_in_form '<div class="field"><div class="label"><label for="book_title">Title</label></div><input id="book_title" name="book[title]" size="30" type="text" value="Empire of the Sun" /></div>'
